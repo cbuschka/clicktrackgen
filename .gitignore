@@ -1,2 +1,3 @@
+/audio_cache/
 /dist/
-/click.wav
+/*.wav

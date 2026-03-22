@@ -4,26 +4,17 @@ import (
 	"math"
 )
 
-const (
-	SampleRate = 44100
-	BitDepth   = 16
-	MaxAmp     = 32767 // Max value for int16
-)
-
 type Generator struct {
 	BPM          int
 	Measures     int
 	FileName     string
-	CustomSample []int16 // Optional: User-provided WAV data
-	AccentCustomSample []int16 // Optional: User-provided WAV data
+	CustomSample *Sample // Optional: User-provided WAV data
+	AccentCustomSample *Sample // Optional: User-provided WAV data
+	Clues map[int]string
 }
 
 // GenerateCountin creates the 2-measure intro buffer
-func (g *Generator) GenerateCountin(samplesPerBeat int, clickAsset []int16) []int16 {
-	// 2 measures * 4 beats
-	countInSamples := 2 * 4 * samplesPerBeat
-	buffer := make([]int16, countInSamples)
-
+func (g *Generator) GenerateCountin(samplesPerBeat int, clickAsset *Sample, target *Sample, gain float64) error {
 	// Measure 0: Two Half Notes (Beat 1 and Beat 3)
 	// Measure 1: Four Quarter Notes (Beat 1, 2, 3, 4)
 	
@@ -41,39 +32,67 @@ func (g *Generator) GenerateCountin(samplesPerBeat int, clickAsset []int16) []in
 			
 			offset := (m * 4 * samplesPerBeat) + (b * samplesPerBeat)
 			
-			MixAudio(buffer, clickAsset, offset, 1.0)
+			target.MixIn(clickAsset, offset, gain)
 		}
 	}
-	return buffer
+	return nil
 }
 
 func (g *Generator) Generate() error {
 	samplesPerBeat := (SampleRate * 60) / g.BPM
+        bufferLen := (g.Measures + 2) * 4 * samplesPerBeat
+        buffer := make([]int16, bufferLen)
+	sample := &Sample{Rate: 44100, Data: buffer}
+
+	err := g.GenerateClickTrack(sample)
+	if err != nil {
+		return err
+	}
+
+       err = g.GenerateClueStream(samplesPerBeat, sample, 0.5)
+	if err != nil {
+		return err
+	}
+
+	err = g.writeToWav(g.FileName, sample)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (g *Generator) GenerateClickTrack(target *Sample) error {
+	samplesPerBeat := (SampleRate * 60) / g.BPM
 	
 	// 1. Prepare assets
-	var clickAsset []int16
-	var accentClickAsset []int16
-	if len(g.CustomSample) > 0 {
+	var clickAsset *Sample
+	var accentClickAsset *Sample
+	if g.CustomSample != nil {
 		clickAsset = g.CustomSample
 	} else {
 		clickAsset = generateSinePulse(1000.0, 0.05)
 	}
-	if len(g.AccentCustomSample) > 0 {
+	if g.AccentCustomSample != nil {
 		accentClickAsset = g.AccentCustomSample
 	} else {
 		accentClickAsset = generateSinePulse(1000.0, 0.05)
 	}
 
 	// 2. Generate the Count-in "Module"
-	countInBuf := g.GenerateCountin(samplesPerBeat, clickAsset)
+	err := g.GenerateCountin(samplesPerBeat, clickAsset, target, 1.0)
+	if err != nil {
+		return err
+	}
+
+	samplesForCountIn := samplesPerBeat * 4 * 2 
 
 	// 3. Generate the Main Song "Module"
 	songMeasures := g.Measures
-	songBuf := make([]int16, songMeasures*4*samplesPerBeat)
 	
 	for m := 0; m < songMeasures; m++ {
 		for b := 0; b < 4; b++ {
-			offset := (m * 4 * samplesPerBeat) + (b * samplesPerBeat)
+			offset := samplesForCountIn + (m * 4 * samplesPerBeat) + (b * samplesPerBeat)
 
 			clickGain := 0.75			
 			asset := clickAsset
@@ -81,19 +100,15 @@ func (g *Generator) Generate() error {
 				clickGain = 1.0
 				asset = accentClickAsset
 			}
-			
-			MixAudio(songBuf, asset, offset, clickGain)
+		
+			target.MixIn(asset, offset, clickGain)	
 		}
 	}
 
-	// 4. Concatenate/Combine (The "Final Build")
-	// We create a master buffer and copy the parts in
-	finalBuffer := append(countInBuf, songBuf...)
-
-	return g.writeToWav(finalBuffer)
+	return nil
 }
 
-func generateSinePulse(freq float64, duration float64) []int16 {
+func generateSinePulse(freq float64, duration float64) *Sample {
 	numSamples := int(float64(SampleRate) * duration)
 	pulse := make([]int16, numSamples)
 	for i := 0; i < numSamples; i++ {
@@ -103,5 +118,5 @@ func generateSinePulse(freq float64, duration float64) []int16 {
 		value := math.Sin(2 * math.Pi * freq * t)
 		pulse[i] = int16(value * MaxAmp * 0.5 * envelope)
 	}
-	return pulse
+	return &Sample{Rate: 44100, Data: pulse}
 }

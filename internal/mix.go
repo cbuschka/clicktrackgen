@@ -2,8 +2,8 @@ package internal
 
 // MixAudio combines the 'voice' buffer into the 'click' buffer at a specific offset.
 // voiceGain should be between 0.0 and 1.0 (e.g., 0.7 for -3dB).
-func MixAudio(clickBase []int16, voice []int16, offset int, voiceGain float64) {
-	for i := 0; i < len(voice); i++ {
+func MixAudio(clickBase []int16, voice *Sample, offset int, voiceGain float64) {
+	for i := 0; i < len(voice.Data); i++ {
 		targetIdx := offset + i
 		
 		// Boundary check (Safety first)
@@ -14,7 +14,7 @@ func MixAudio(clickBase []int16, voice []int16, offset int, voiceGain float64) {
 		// 1. Convert to float64 for high-precision math
 		// 2. Apply gain to the voice sample
 		// 3. Sum the signals
-		mixed := float64(clickBase[targetIdx]) + (float64(voice[i]) * voiceGain)
+		mixed := float64(clickBase[targetIdx]) + (float64(voice.Data[i]) * voiceGain)
 
 		// 4. Hard Clipping (Protection against overflow)
 		if mixed > 32767 {
