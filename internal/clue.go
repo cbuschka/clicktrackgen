@@ -62,15 +62,17 @@ func (g *Generator) GenerateClueStream(samplesPerBeat int, target *Sample, gain 
 		}
 
 		// 2. Place the Label ("Verse 1") in the measure BEFORE the countdown
-		labelMeasure := actualTargetMeasure - 2
+		labelMeasure := actualTargetMeasure - 1
 		if labelMeasure >= 0 {
 			voiceSample, err := newSpeechSample(speech, text)
 			if err != nil {
 				return err
 			}
 			
-			offset := (labelMeasure * 4 * samplesPerBeat)
-			target.MixIn(voiceSample, offset, gain)
+			offset := (labelMeasure * 4 * samplesPerBeat) - samplesPerBeat - len(voiceSample.Data)
+			if offset >= 0 {
+				target.MixIn(voiceSample, offset, gain)
+			}
 		}
 	}
 	return nil
