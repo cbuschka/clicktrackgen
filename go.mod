@@ -1,3 +1,3 @@
-module github.com/cbuschka/clicktrack-tool
+module github.com/cbuschka/clicktrackgen
 
 go 1.25.7
