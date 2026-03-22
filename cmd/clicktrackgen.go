@@ -4,7 +4,6 @@ import (
 	"flag"
 	"fmt"
 	"log"
-	"path/filepath"
 	"strconv"
 	"strings"
 	"github.com/cbuschka/clicktrackgen/internal"
@@ -27,7 +26,8 @@ func parseClues(input string) map[int]string {
 func main() {
 	bpm := flag.Int("bpm", 120, "Beats per minute")
 	measures := flag.Int("m", 4, "Number of measures")
-	out := flag.String("o", "click.wav", "Output file")
+	clickTrackOut := flag.String("clickTrackOut", "click.wav", "Output file")
+	clueTrackOut := flag.String("clueTrackOut", "clue.wav", "Output file")
 	samplePath := flag.String("sample", "", "Path to custom click WAV (optional)")
 	accentSamplePath := flag.String("accentSample", "", "Path to custom click WAV (optional)")
 	cluesFlag := flag.String("clues", "", "Clues")
@@ -63,7 +63,8 @@ func main() {
 	gen := &internal.Generator{
 		BPM:          *bpm,
 		Measures:     *measures,
-		FileName:     *out,
+		ClickTrackFileName:     *clickTrackOut,
+		ClueTrackFileName:     *clueTrackOut,
 		CustomSample: customData, // Pass the slice (nil if not loaded)
 		AccentCustomSample: accentCustomData, // Pass the slice (nil if not loaded)
 		Clues:        clues,
@@ -76,7 +77,4 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to generate click track: %v", err)
 	}
-
-	absPath, _ := filepath.Abs(*out)
-	fmt.Printf("Success! File saved to: %s\n", absPath)
 }

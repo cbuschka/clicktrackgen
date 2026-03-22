@@ -7,7 +7,8 @@ import (
 type Generator struct {
 	BPM          int
 	Measures     int
-	FileName     string
+	ClickTrackFileName     string
+	ClueTrackFileName     string
 	CustomSample *Sample // Optional: User-provided WAV data
 	AccentCustomSample *Sample // Optional: User-provided WAV data
 	Clues map[int]string
@@ -42,19 +43,26 @@ func (g *Generator) Generate() error {
 	samplesPerBeat := (SampleRate * 60) / g.BPM
         bufferLen := (g.Measures + 2) * 4 * samplesPerBeat
         buffer := make([]int16, bufferLen)
-	sample := &Sample{Rate: 44100, Data: buffer}
+	clickTrackSample := &Sample{Rate: 44100, Data: buffer}
 
-	err := g.GenerateClickTrack(sample)
+	err := g.GenerateClickTrack(clickTrackSample)
 	if err != nil {
 		return err
 	}
 
-       err = g.GenerateClueStream(samplesPerBeat, sample, 0.5)
+	err = g.writeToWav(g.ClickTrackFileName, clickTrackSample)
 	if err != nil {
 		return err
 	}
 
-	err = g.writeToWav(g.FileName, sample)
+        buffer = make([]int16, bufferLen)
+	clueTrackSample := &Sample{Rate: 44100, Data: buffer}
+        err = g.GenerateClueStream(samplesPerBeat, clueTrackSample, 1.0)
+	if err != nil {
+		return err
+	}
+
+	err = g.writeToWav(g.ClueTrackFileName, clueTrackSample)
 	if err != nil {
 		return err
 	}
