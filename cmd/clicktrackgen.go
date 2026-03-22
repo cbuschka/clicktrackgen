@@ -13,10 +13,12 @@ func main() {
 	measures := flag.Int("m", 4, "Number of measures")
 	out := flag.String("o", "click.wav", "Output file")
 	samplePath := flag.String("sample", "", "Path to custom click WAV (optional)")
+	accentSamplePath := flag.String("accentSample", "", "Path to custom click WAV (optional)")
 
 	flag.Parse()
 
 	var customData []int16
+	var accentCustomData []int16
 	var err error
 
 	// If the user provided a sample, load it into memory
@@ -28,11 +30,20 @@ func main() {
 		fmt.Println("Using custom click sample:", *samplePath)
 	}
 
+	if *accentSamplePath != "" {
+		accentCustomData, err = internal.LoadWavSamples(*accentSamplePath)
+		if err != nil {
+			log.Fatalf("Could not load custom sample: %v", err)
+		}
+		fmt.Println("Using custom click sample:", *accentSamplePath)
+	}
+
 	gen := &internal.Generator{
 		BPM:          *bpm,
 		Measures:     *measures,
 		FileName:     *out,
 		CustomSample: customData, // Pass the slice (nil if not loaded)
+		AccentCustomSample: accentCustomData, // Pass the slice (nil if not loaded)
 	}
 
 	fmt.Printf("Generating %d BPM click track (%d measures + 2 count-in)...\n", *bpm, *measures)

@@ -15,6 +15,7 @@ type Generator struct {
 	Measures     int
 	FileName     string
 	CustomSample []int16 // Optional: User-provided WAV data
+	AccentCustomSample []int16 // Optional: User-provided WAV data
 }
 
 // GenerateCountin creates the 2-measure intro buffer
@@ -51,10 +52,16 @@ func (g *Generator) Generate() error {
 	
 	// 1. Prepare assets
 	var clickAsset []int16
+	var accentClickAsset []int16
 	if len(g.CustomSample) > 0 {
 		clickAsset = g.CustomSample
 	} else {
 		clickAsset = generateSinePulse(1000.0, 0.05)
+	}
+	if len(g.AccentCustomSample) > 0 {
+		accentClickAsset = g.AccentCustomSample
+	} else {
+		accentClickAsset = generateSinePulse(1000.0, 0.05)
 	}
 
 	// 2. Generate the Count-in "Module"
@@ -67,13 +74,15 @@ func (g *Generator) Generate() error {
 	for m := 0; m < songMeasures; m++ {
 		for b := 0; b < 4; b++ {
 			offset := (m * 4 * samplesPerBeat) + (b * samplesPerBeat)
-			
+
+			clickGain := 0.75			
 			asset := clickAsset
 			if b == 0 {
-				asset = generateSinePulse(1500.0, 0.05)
+				clickGain = 1.0
+				asset = accentClickAsset
 			}
 			
-			MixAudio(songBuf, asset, offset, 1.0)
+			MixAudio(songBuf, asset, offset, clickGain)
 		}
 	}
 
