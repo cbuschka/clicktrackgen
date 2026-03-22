@@ -33,7 +33,9 @@ func newSpeechSample(speech htgotts.Speech, text string) (*Sample, error) {
 		return nil, err
 	}
 
-	return voiceSample,nil
+	voiceSample.TrimSilence(0.01)
+
+	return voiceSample, nil
 }
 
 // GenerateClueStream creates a dedicated mono track for voice cues

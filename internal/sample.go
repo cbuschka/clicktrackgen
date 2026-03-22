@@ -30,3 +30,6 @@ func (s *Sample) MixIn(voice *Sample, offset int, voiceGain float64) error {
 	return nil
 }
 
+func (s *Sample) TrimSilence(threshold float64) {
+	s.Data = TrimSilence(s.Data, int16(MaxAmp * threshold))
+}
