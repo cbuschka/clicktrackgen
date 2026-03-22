@@ -84,7 +84,10 @@ func (g *Generator) GenerateClickTrack(target *Sample) error {
 				asset = accentClickAsset
 			}
 		
-			target.MixIn(asset, offset, clickGain)	
+			err := target.MixIn(asset, offset, clickGain)
+			if err != nil {
+				return err
+			}
 		}
 	}
 

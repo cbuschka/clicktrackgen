@@ -1,10 +1,16 @@
 package internal
 
+import (
+	"errors"
+)
+
 const (
 	SampleRate = 44100
 	BitDepth   = 16
 	MaxAmp     = 32767 // Max value for int16
 )
+
+var ErrDiffSampleRate = errors.New("different sample rate")
 
 type Sample struct {
 	Rate int
@@ -16,7 +22,11 @@ func NewSample(rate int, len int) *Sample {
 	return &Sample{Rate: rate, Data: buf}
 }
 
-func (s *Sample) MixIn(voice *Sample, offset int, voiceGain float64) {
+func (s *Sample) MixIn(voice *Sample, offset int, voiceGain float64) error {
+	if voice.Rate != s.Rate {
+		return ErrDiffSampleRate
+	}
 	MixAudio(s.Data, voice, offset, voiceGain)
+	return nil
 }
 

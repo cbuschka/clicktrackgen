@@ -49,6 +49,7 @@ func (g *Generator) GenerateClueStream(samplesPerBeat int, target *Sample, gain 
 		countdownMeasure := actualTargetMeasure - 1
 		if countdownMeasure >= 0 {
 			for b := 0; b < 4; b++ {
+				var err error
 				countText := fmt.Sprintf("%d", 4-b)
 				// Fetch/Generate TTS for "4", "3", etc.
 				voiceSample, err := newSpeechSample(speech, countText)
@@ -57,7 +58,10 @@ func (g *Generator) GenerateClueStream(samplesPerBeat int, target *Sample, gain 
 				}
 				
 				offset := ((countdownMeasure * 4 - 1) * samplesPerBeat) + (b * samplesPerBeat)
-				target.MixIn(voiceSample, offset, gain)
+				err = target.MixIn(voiceSample, offset, gain)
+				if err != nil {
+					return err
+				}
 			}
 		}
 
@@ -71,7 +75,10 @@ func (g *Generator) GenerateClueStream(samplesPerBeat int, target *Sample, gain 
 			
 			offset := (labelMeasure * 4 * samplesPerBeat) - samplesPerBeat - len(voiceSample.Data)
 			if offset >= 0 {
-				target.MixIn(voiceSample, offset, gain)
+				err := target.MixIn(voiceSample, offset, gain)
+				if err != nil {
+					return err
+				}
 			}
 		}
 	}
