@@ -24,6 +24,8 @@ func parseClues(input string) map[int]string {
 }
 
 func main() {
+	var err error
+
 	bpm := flag.Int("bpm", 120, "Beats per minute")
 	measures := flag.Int("m", 4, "Number of measures")
 	clickTrackOut := flag.String("clickTrackOut", "click.wav", "Output file")
@@ -36,7 +38,6 @@ func main() {
 
 	var customData *internal.Sample
 	var accentCustomData *internal.Sample
-	var err error
 
 	var clues map[int]string
 	if *cluesFlag != "" {

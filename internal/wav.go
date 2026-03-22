@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"bufio"
 	"encoding/binary"
 	"fmt"
 	"io"
@@ -9,11 +10,14 @@ import (
 
 // WriteWav wraps the raw PCM data with the necessary 44-byte header
 func (g *Generator) writeToWav(fileName string, sample *Sample) error {
-	f, err := os.Create(fileName)
+	file, err := os.Create(fileName)
 	if err != nil {
 		return err
 	}
-	defer f.Close()
+	defer file.Close()
+
+	f := bufio.NewWriter(file)
+	defer f.Flush()
 
 	buffer := sample.Data
 	numSamples := len(buffer)

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"path/filepath"
+	"os"
 	htgotts "github.com/hegedustibor/htgo-tts" // Example TTS lib
 	voices "github.com/hegedustibor/htgo-tts/voices"
 )
@@ -40,7 +41,12 @@ func newSpeechSample(speech htgotts.Speech, text string) (*Sample, error) {
 
 // GenerateClueStream creates a dedicated mono track for voice cues
 func (g *Generator) GenerateClueStream(samplesPerBeat int, target *Sample, gain float64) error {
-	speech := htgotts.Speech{Folder: "audio_cache", Language: voices.English}
+	tmpDir, err := os.MkdirTemp("", "clicktrackgen")
+	if err != nil {
+		return err
+	}
+	defer os.RemoveAll(tmpDir)
+	speech := htgotts.Speech{Folder: tmpDir, Language: voices.English}
 
 	for targetMeasure, text := range g.Clues {
 		// Calculate internal indices. 
