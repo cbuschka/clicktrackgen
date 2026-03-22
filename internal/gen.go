@@ -10,42 +10,42 @@ const (
 	MaxAmp     = 32767 // Max value for int16
 )
 
-// Generator handles the audio buffer construction
 type Generator struct {
-	BPM      int
-	Measures int
-	FileName string
+	BPM          int
+	Measures     int
+	FileName     string
+	CustomSample []int16 // Optional: User-provided WAV data
 }
 
-// Generate creates the raw PCM data and writes to file
 func (g *Generator) Generate() error {
 	samplesPerBeat := (SampleRate * 60) / g.BPM
-	totalMeasures := g.Measures + 2 // Including 2-measure count-in
+	totalMeasures := g.Measures + 2
 	totalSamples := totalMeasures * 4 * samplesPerBeat
 	buffer := make([]int16, totalSamples)
 
-	// 2. Map the Clicks to the Buffer
+	// 1. Determine our "Source Asset"
+	var clickAsset []int16
+	if len(g.CustomSample) > 0 {
+		clickAsset = g.CustomSample
+	} else {
+		// Fallback to the generated Sine Pulse if no file was provided
+		clickAsset = generateSinePulse(1000.0, 0.05)
+	}
+
+	// 2. Orchestration Loop
 	for m := 0; m < totalMeasures; m++ {
 		for b := 0; b < 4; b++ {
-			currentIndex := (m * 4 * samplesPerBeat) + (b * samplesPerBeat)
-
-			// Logic for Count-in (Measure 0: only beats 1 & 2. Measure 1: all beats)
+			// Skip logic for the first measure of count-in (Beats 3 & 4)
 			if m == 0 && b >= 2 {
-				continue // Silence for beats 3 & 4 of first measure
+				continue
 			}
 
-			// Logic for the Accent (Beat 1 of the measure)
-			freq := 1000.0 // Standard "beep"
-			if b == 0 {
-				freq = 1500.0 // Higher pitch for the "One"
-			}
+			// Calculate the "Address" in the buffer
+			offset := (m * 4 * samplesPerBeat) + (b * samplesPerBeat)
 
-			tickSamples := generateSinePulse(freq, 0.05)
-
-			// Write the tick into the buffer
-			for i := 0; i < len(tickSamples) && (currentIndex+i) < len(buffer); i++ {
-				buffer[currentIndex+i] = tickSamples[i]
-			}
+			// 3. Use the Mixer instead of a manual copy loop
+			// Gain is set to 1.0 for the click to ensure it's the primary clock
+			MixAudio(buffer, clickAsset, offset, 1.0)
 		}
 	}
 

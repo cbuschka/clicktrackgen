@@ -4,36 +4,41 @@ import (
 	"flag"
 	"fmt"
 	"log"
-	"os"
 	"path/filepath"
 	"github.com/cbuschka/clicktrackgen/internal"
 )
 
 func main() {
-	// 1. Define Flags
 	bpm := flag.Int("bpm", 120, "Beats per minute")
-	measures := flag.Int("m", 4, "Number of measures (excluding count-in)")
-	out := flag.String("o", "click.wav", "Output file name")
+	measures := flag.Int("m", 4, "Number of measures")
+	out := flag.String("o", "click.wav", "Output file")
+	samplePath := flag.String("sample", "", "Path to custom click WAV (optional)")
 
 	flag.Parse()
 
-	// 2. Validate Input
-	if *bpm <= 0 || *measures <= 0 {
-		fmt.Println("Error: BPM and Measures must be greater than 0")
-		os.Exit(1)
+	var customData []int16
+	var err error
+
+	// If the user provided a sample, load it into memory
+	if *samplePath != "" {
+		customData, err = internal.LoadWavSamples(*samplePath)
+		if err != nil {
+			log.Fatalf("Could not load custom sample: %v", err)
+		}
+		fmt.Println("Using custom click sample:", *samplePath)
 	}
 
-	// 3. Initialize Generator
 	gen := &internal.Generator{
-		BPM:      *bpm,
-		Measures: *measures,
-		FileName: *out,
+		BPM:          *bpm,
+		Measures:     *measures,
+		FileName:     *out,
+		CustomSample: customData, // Pass the slice (nil if not loaded)
 	}
 
 	fmt.Printf("Generating %d BPM click track (%d measures + 2 count-in)...\n", *bpm, *measures)
 
 	// 4. Run the "Job"
-	err := gen.Generate()
+	err = gen.Generate()
 	if err != nil {
 		log.Fatalf("Failed to generate click track: %v", err)
 	}
