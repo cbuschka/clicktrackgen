@@ -17,39 +17,71 @@ type Generator struct {
 	CustomSample []int16 // Optional: User-provided WAV data
 }
 
+// GenerateCountin creates the 2-measure intro buffer
+func (g *Generator) GenerateCountin(samplesPerBeat int, clickAsset []int16) []int16 {
+	// 2 measures * 4 beats
+	countInSamples := 2 * 4 * samplesPerBeat
+	buffer := make([]int16, countInSamples)
+
+	// Measure 0: Two Half Notes (Beat 1 and Beat 3)
+	// Measure 1: Four Quarter Notes (Beat 1, 2, 3, 4)
+	
+	// Map of beats to trigger: [Measure][Beat]
+	timeline := [][]bool{
+		{true, false, true, false}, // Measure 0
+		{true, true, true, true},   // Measure 1
+	}
+
+	for m, beats := range timeline {
+		for b, active := range beats {
+			if !active {
+				continue
+			}
+			
+			offset := (m * 4 * samplesPerBeat) + (b * samplesPerBeat)
+			
+			MixAudio(buffer, clickAsset, offset, 1.0)
+		}
+	}
+	return buffer
+}
+
 func (g *Generator) Generate() error {
 	samplesPerBeat := (SampleRate * 60) / g.BPM
-	totalMeasures := g.Measures + 2
-	totalSamples := totalMeasures * 4 * samplesPerBeat
-	buffer := make([]int16, totalSamples)
-
-	// 1. Determine our "Source Asset"
+	
+	// 1. Prepare assets
 	var clickAsset []int16
 	if len(g.CustomSample) > 0 {
 		clickAsset = g.CustomSample
 	} else {
-		// Fallback to the generated Sine Pulse if no file was provided
 		clickAsset = generateSinePulse(1000.0, 0.05)
 	}
 
-	// 2. Orchestration Loop
-	for m := 0; m < totalMeasures; m++ {
+	// 2. Generate the Count-in "Module"
+	countInBuf := g.GenerateCountin(samplesPerBeat, clickAsset)
+
+	// 3. Generate the Main Song "Module"
+	songMeasures := g.Measures
+	songBuf := make([]int16, songMeasures*4*samplesPerBeat)
+	
+	for m := 0; m < songMeasures; m++ {
 		for b := 0; b < 4; b++ {
-			// Skip logic for the first measure of count-in (Beats 3 & 4)
-			if m == 0 && b >= 2 {
-				continue
-			}
-
-			// Calculate the "Address" in the buffer
 			offset := (m * 4 * samplesPerBeat) + (b * samplesPerBeat)
-
-			// 3. Use the Mixer instead of a manual copy loop
-			// Gain is set to 1.0 for the click to ensure it's the primary clock
-			MixAudio(buffer, clickAsset, offset, 1.0)
+			
+			asset := clickAsset
+			if b == 0 {
+				asset = generateSinePulse(1500.0, 0.05)
+			}
+			
+			MixAudio(songBuf, asset, offset, 1.0)
 		}
 	}
 
-	return g.writeToWav(buffer)
+	// 4. Concatenate/Combine (The "Final Build")
+	// We create a master buffer and copy the parts in
+	finalBuffer := append(countInBuf, songBuf...)
+
+	return g.writeToWav(finalBuffer)
 }
 
 func generateSinePulse(freq float64, duration float64) []int16 {
