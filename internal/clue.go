@@ -1,9 +1,11 @@
 package internal
 
 import (
+	"errors"
 	"fmt"
-	"io/ioutil"
+	"log"
 	"path/filepath"
+	"net/url"
 	"os"
 	htgotts "github.com/hegedustibor/htgo-tts" // Example TTS lib
 	voices "github.com/hegedustibor/htgo-tts/voices"
@@ -22,14 +24,21 @@ func speechHandler(f func(string) error) *speechHandlerWrapper {
 }
 
 func newSpeechSample(speech htgotts.Speech, text string) (*Sample, error) {
-	tmpfile, err := ioutil.TempFile("", "")
-	tmpfileName := filepath.Base(tmpfile.Name())
+	escapedText := url.QueryEscape(text)
+	filename := filepath.Join(speech.Folder, escapedText + ".mp3")
 
-	voiceFile, err := speech.CreateSpeechFile(text, tmpfileName)
-	if err != nil {
-		return nil, err
+	if _, err := os.Stat(filename); errors.Is(err, os.ErrNotExist) {
+		log.Printf("generating speech file for text='%s'", text)
+		voiceFile, err := speech.CreateSpeechFile(text, escapedText)
+		if err != nil {
+			return nil, err
+		}
+		filename = voiceFile
+	} else {
+		log.Printf("speech file for text='%s' already exists", text)
 	}
-	voiceSample, err := LoadMp3Sample(voiceFile)
+
+	voiceSample, err := LoadMp3Sample(filename)
 	if err != nil {
 		return nil, err
 	}
