@@ -2,6 +2,8 @@ package internal
 
 import (
 	"encoding/binary"
+	"fmt"
+	"io"
 	"os"
 )
 
@@ -51,4 +53,42 @@ func (g *Generator) writeToWav(buffer []int16) error {
 	}
 
 	return nil
+}
+
+// LoadWavSamples reads a 16-bit Mono WAV and returns the raw PCM data
+func LoadWavSamples(path string) ([]int16, error) {
+	f, err := os.Open(path)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+
+	// 1. Skip the 44-byte header (Assuming you know it's 44.1k/16bit/Mono)
+	// In a production tool, you'd parse this to ensure compatibility.
+	header := make([]byte, 44)
+	if _, err := f.Read(header); err != nil {
+		return nil, err
+	}
+
+	// Validate it's actually a WAVE file
+	if string(header[0:4]) != "RIFF" || string(header[8:12]) != "WAVE" {
+		return nil, fmt.Errorf("file %s is not a valid WAV file", path)
+	}
+
+	// 2. Read the rest of the file as int16 samples
+	var samples []int16
+	for {
+		var sample int16
+		// WAV data is Little Endian
+		err := binary.Read(f, binary.LittleEndian, &sample)
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return nil, err
+		}
+		samples = append(samples, sample)
+	}
+
+	return samples, nil
 }
