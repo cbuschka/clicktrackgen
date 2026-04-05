@@ -7,6 +7,7 @@ import (
 type Generator struct {
 	BPM          int
 	Measures     int
+	SongTrackFileName     string
 	ClickTrackFileName     string
 	ClueTrackFileName     string
 	CombinedTrackFileName     string
@@ -45,12 +46,27 @@ func (g *Generator) Generate() error {
 
 
 	if g.CombinedTrackFileName != "" {
-		err = clickTrackSample.MixIn(clueTrackSample, 0, 1.0)
+		var combinedTrackSample *Sample
+		if g.SongTrackFileName != "" {
+			combinedTrackSample, err = LoadWavSample(g.SongTrackFileName)
+			if err != nil {
+				return err
+			}
+		} else {
+			combinedTrackSample = NewSample(clickTrackSample.Rate, 0) 
+		}
+
+		err = combinedTrackSample.MixIn(clickTrackSample, 0, 1.0)
 		if err != nil {
 			return err
 		}
 
-		err = g.writeToWav(g.CombinedTrackFileName, clickTrackSample)
+		err = combinedTrackSample.MixIn(clueTrackSample, 0, 1.0)
+		if err != nil {
+			return err
+		}
+
+		err = g.writeToWav(g.CombinedTrackFileName, combinedTrackSample)
 		if err != nil {
 			return err
 		}
