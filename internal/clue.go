@@ -43,7 +43,7 @@ func newSpeechSample(speech htgotts.Speech, text string) (*Sample, error) {
 		return nil, err
 	}
 
-	voiceSample.TrimSilence(0.8)
+	voiceSample.TrimSilence(0.08)
 
 	return voiceSample, nil
 }
@@ -75,7 +75,7 @@ func (g *Generator) GenerateClueStream(samplesPerBeat int, target *Sample, gain 
 					return err
 				}
 				
-				offset := ((countdownBar * 4 -1) * samplesPerBeat) + (b * samplesPerBeat)
+				offset := (countdownBar * 4 * samplesPerBeat) + (b * samplesPerBeat)
 				err = target.MixIn(voiceSample, offset, gain)
 				if err != nil {
 					return err
