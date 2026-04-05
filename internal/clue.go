@@ -43,7 +43,7 @@ func newSpeechSample(speech htgotts.Speech, text string) (*Sample, error) {
 		return nil, err
 	}
 
-	voiceSample.TrimSilence(0.01)
+	voiceSample.TrimSilence(0.8)
 
 	return voiceSample, nil
 }
@@ -57,14 +57,15 @@ func (g *Generator) GenerateClueStream(samplesPerBeat int, target *Sample, gain 
 	defer os.RemoveAll(tmpDir)
 	speech := htgotts.Speech{Folder: tmpDir, Language: voices.English}
 
-	for targetMeasure, text := range g.Clues {
+	for targetBar, text := range g.Clues {
 		// Calculate internal indices. 
 		// Remember: We have a 2-measure count-in at the start of the buffer.
-		actualTargetMeasure := targetMeasure + 2
+		actualTargetBar := targetBar + 2
 		
-		// 1. Place the "4 3 2 1" countdown in the measure BEFORE the target
-		countdownMeasure := actualTargetMeasure - 1
-		if countdownMeasure >= 0 {
+		// 1. Place the "1 2 3 4" countdown in the measure BEFORE the target
+		countdownBar := actualTargetBar - 1
+		labelBar := actualTargetBar - 1
+		if countdownBar >= 0 && labelBar >= 0 {
 			for b := 0; b < 4; b++ {
 				var err error
 				countText := fmt.Sprintf("%d", 4-b)
@@ -74,23 +75,20 @@ func (g *Generator) GenerateClueStream(samplesPerBeat int, target *Sample, gain 
 					return err
 				}
 				
-				offset := ((countdownMeasure * 4 - 1) * samplesPerBeat) + (b * samplesPerBeat)
+				offset := ((countdownBar * 4 -1) * samplesPerBeat) + (b * samplesPerBeat)
 				err = target.MixIn(voiceSample, offset, gain)
 				if err != nil {
 					return err
 				}
 			}
-		}
 
-		// 2. Place the Label ("Verse 1") in the measure BEFORE the countdown
-		labelMeasure := actualTargetMeasure - 1
-		if labelMeasure >= 0 {
+			// 2. Place the Label ("Verse 1") in the measure BEFORE the countdown
 			voiceSample, err := newSpeechSample(speech, text)
 			if err != nil {
 				return err
 			}
 			
-			offset := (labelMeasure * 4 * samplesPerBeat) - samplesPerBeat - len(voiceSample.Data)
+			offset := ((labelBar * 4 -1) * samplesPerBeat) - len(voiceSample.Data)
 			if offset >= 0 {
 				err := target.MixIn(voiceSample, offset, gain)
 				if err != nil {
