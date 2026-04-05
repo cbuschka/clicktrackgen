@@ -9,6 +9,7 @@ type Generator struct {
 	Measures     int
 	ClickTrackFileName     string
 	ClueTrackFileName     string
+	CombinedTrackFileName     string
 	CustomSample *Sample // Optional: User-provided WAV data
 	AccentCustomSample *Sample // Optional: User-provided WAV data
 	Clues map[int]string
@@ -40,6 +41,19 @@ func (g *Generator) Generate() error {
 	err = g.writeToWav(g.ClueTrackFileName, clueTrackSample)
 	if err != nil {
 		return err
+	}
+
+
+	if g.CombinedTrackFileName != "" {
+		err = clickTrackSample.MixIn(clueTrackSample, 0, 1.0)
+		if err != nil {
+			return err
+		}
+
+		err = g.writeToWav(g.CombinedTrackFileName, clickTrackSample)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
