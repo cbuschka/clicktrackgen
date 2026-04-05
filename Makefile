@@ -12,5 +12,5 @@ run:	build
 		--clueTrackOut=clue.wav \
 		--combinedTrackOut=combined.wav \
 		--bpm 150 \
-		-m 48 \
-		--clues=0:"intro",8:"verse 1",24:"pre chorus",32:"chorus 1"
+		--bars 156 \
+		--clues=0:"intro",8:"verse 1",24:"pre chorus",32:"chorus 1",48:"interlude",56:"verse 2",72:"pre chorus 2",80:"chorus 2",96:"interlude 2",104:"bridge",112:"chorus 3",128:"chorus 4",148:"trash can ending"

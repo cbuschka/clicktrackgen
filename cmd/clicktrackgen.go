@@ -27,7 +27,7 @@ func main() {
 	var err error
 
 	bpm := flag.Int("bpm", 120, "Beats per minute")
-	measures := flag.Int("m", 4, "Number of measures")
+	bars := flag.Int("bars", 4, "Number of bars")
 	songTrackIn := flag.String("songTrackIn", "song.wav", "Input file")
 	clickTrackOut := flag.String("clickTrackOut", "click.wav", "Output file")
 	clueTrackOut := flag.String("clueTrackOut", "clue.wav", "Output file")
@@ -65,7 +65,7 @@ func main() {
 
 	gen := &internal.Generator{
 		BPM:          *bpm,
-		Measures:     *measures,
+		Bars:     *bars,
 		SongTrackFileName: *songTrackIn,
 		ClickTrackFileName:     *clickTrackOut,
 		ClueTrackFileName:     *clueTrackOut,
@@ -75,7 +75,7 @@ func main() {
 		Clues:        clues,
 	}
 
-	fmt.Printf("Generating %d BPM click track (%d measures + 2 count-in)...\n", *bpm, *measures)
+	fmt.Printf("Generating %d BPM click track (%d bars + 2 count-in)...\n", *bpm, *bars)
 
 	// 4. Run the "Job"
 	err = gen.Generate()

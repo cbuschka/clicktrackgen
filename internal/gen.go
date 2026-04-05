@@ -6,7 +6,7 @@ import (
 
 type Generator struct {
 	BPM          int
-	Measures     int
+	Bars int
 	SongTrackFileName     string
 	ClickTrackFileName     string
 	ClueTrackFileName     string
@@ -18,7 +18,7 @@ type Generator struct {
 
 func (g *Generator) Generate() error {
 	samplesPerBeat := (SampleRate * 60) / g.BPM
-        bufferLen := (g.Measures + 2) * 4 * samplesPerBeat
+        bufferLen := (g.Bars + 2) * 4 * samplesPerBeat
         buffer := make([]int16, bufferLen)
 	clickTrackSample := &Sample{Rate: 44100, Data: buffer}
 
@@ -101,9 +101,9 @@ func (g *Generator) GenerateClickTrack(target *Sample) error {
 	samplesForCountIn := samplesPerBeat * 4 * 2 
 
 	// 3. Generate the Main Song "Module"
-	songMeasures := g.Measures
+	songBars := g.Bars
 	
-	for m := 0; m < songMeasures; m++ {
+	for m := 0; m < songBars; m++ {
 		for b := 0; b < 4; b++ {
 			offset := samplesForCountIn + (m * 4 * samplesPerBeat) + (b * samplesPerBeat)
 
