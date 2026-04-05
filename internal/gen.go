@@ -46,19 +46,19 @@ func (g *Generator) Generate() error {
 
 
 	if g.CombinedTrackFileName != "" {
-		var combinedTrackSample *Sample
+		combinedTrackSample := clickTrackSample.Clone()
 		if g.SongTrackFileName != "" {
-			combinedTrackSample, err = LoadWavSample(g.SongTrackFileName)
+			songTrackSample, err := LoadWavSample(g.SongTrackFileName)
 			if err != nil {
 				return err
 			}
-		} else {
-			combinedTrackSample = NewSample(clickTrackSample.Rate, 0) 
-		}
 
-		err = combinedTrackSample.MixIn(clickTrackSample, 0, 1.0)
-		if err != nil {
-			return err
+			songTrackSample.TrimSilence(0.1)
+
+			err = combinedTrackSample.MixIn(songTrackSample, 2 * 4 * samplesPerBeat, 1.0)
+			if err != nil {
+				return err
+			}
 		}
 
 		err = combinedTrackSample.MixIn(clueTrackSample, 0, 1.0)

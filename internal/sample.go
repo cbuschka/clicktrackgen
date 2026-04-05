@@ -22,6 +22,12 @@ func NewSample(rate int, len int) *Sample {
 	return &Sample{Rate: rate, Data: buf}
 }
 
+func (s *Sample) Clone() *Sample {
+	tmp := make([]int16, len(s.Data))
+	copy(tmp, s.Data)
+	return &Sample{Rate: s.Rate, Data: tmp}
+}
+
 func (s *Sample) MixIn(voice *Sample, offset int, voiceGain float64) error {
 	if voice.Rate != s.Rate {
 		return ErrDiffSampleRate
