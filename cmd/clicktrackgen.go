@@ -71,6 +71,7 @@ func main() {
 		BPM:          *bpm,
 		Bars:     *bars,
 		BeatsPerBar: *beatsPerBar,
+		CountInBars: 2,
 		SongTrackFileName: *songTrackIn,
 		ClickTrackFileName:     *clickTrackOut,
 		ClueTrackFileName:     *clueTrackOut,

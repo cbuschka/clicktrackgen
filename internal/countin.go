@@ -1,7 +1,13 @@
 package internal
 
+import "errors"
+
 // GenerateCountin creates the 2-measure intro buffer
 func (g *Generator) GenerateCountin(samplesPerBeat int, clickAsset *Sample, target *Sample, gain float64) error {
+	if g.CountInBars != 0 && g.CountInBars != 2 {
+		return errors.New("CountInBars must be between 0 or 2.")
+	}
+
 	// Measure 0: Two Half Notes (Beat 1 and Beat 3)
 	// Measure 1: Four Quarter Notes (Beat 1, 2, 3, 4)
 	

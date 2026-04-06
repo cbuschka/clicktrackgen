@@ -63,7 +63,7 @@ func (g *Generator) GenerateClueStream(samplesPerBeat int, target *Sample, gain 
 
 		// Calculate internal indices. 
 		// Remember: We have a 2-measure count-in at the start of the buffer.
-		actualTargetBar := targetBar + 2
+		actualTargetBar := targetBar + g.CountInBars
 		
 		// 1. Place the "1 2 3 4" countdown in the measure BEFORE the target
 		countdownBar := actualTargetBar - 1
