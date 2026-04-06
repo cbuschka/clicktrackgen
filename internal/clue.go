@@ -57,7 +57,10 @@ func (g *Generator) GenerateClueStream(samplesPerBeat int, target *Sample, gain 
 	defer os.RemoveAll(tmpDir)
 	speech := htgotts.Speech{Folder: tmpDir, Language: voices.English}
 
-	for targetBar, text := range g.Clues {
+	for _, clue := range g.Clues {
+		targetBar := clue.Bar
+		text := clue.Name
+
 		// Calculate internal indices. 
 		// Remember: We have a 2-measure count-in at the start of the buffer.
 		actualTargetBar := targetBar + 2

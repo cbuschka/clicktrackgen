@@ -13,7 +13,12 @@ type Generator struct {
 	CombinedTrackFileName     string
 	CustomSample *Sample // Optional: User-provided WAV data
 	AccentCustomSample *Sample // Optional: User-provided WAV data
-	Clues map[int]string
+	Clues []Clue
+}
+
+type Clue struct {
+	Name string
+	Bar int
 }
 
 func (g *Generator) Generate() error {

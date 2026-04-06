@@ -9,18 +9,18 @@ import (
 	"github.com/cbuschka/clicktrackgen/internal"
 )
 
-func parseClues(input string) map[int]string {
-	clues := make(map[int]string)
+func parseClues(input string) ([]internal.Clue, error) {
+	clues := make([]internal.Clue, 0, 0)
 	pairs := strings.Split(input, ",")
 	for _, p := range pairs {
 		parts := strings.Split(p, ":")
 		if len(parts) == 2 {
 			m, _ := strconv.Atoi(parts[0])
 			text := strings.Trim(parts[1], "\"")
-			clues[m] = text
+			clues = append(clues, internal.Clue{Bar: m, Name: text})
 		}
 	}
-	return clues
+	return clues, nil
 }
 
 func main() {
@@ -41,9 +41,12 @@ func main() {
 	var customData *internal.Sample
 	var accentCustomData *internal.Sample
 
-	var clues map[int]string
+	var clues []internal.Clue
 	if *cluesFlag != "" {
-		clues = parseClues(*cluesFlag)
+		clues, err = parseClues(*cluesFlag)
+		if err != nil {
+			log.Fatalf("Could not parse clues: %v", err)
+		}
 	}
 
 	// If the user provided a sample, load it into memory
