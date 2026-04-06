@@ -54,6 +54,6 @@ func LoadMp3Sample(path string) (*Sample, error) {
 	//	resampled[i] = samples[int(oldIdx)] // Simplest "Nearest Neighbor" approach
 	//}
 
-	return &Sample{Rate: 44100, Data: samples}, nil
+	return &Sample{Rate: InternalSampleRate, Data: samples}, nil
 }
 

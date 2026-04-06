@@ -40,9 +40,9 @@ func (g *Generator) writeToWav(fileName string, sample *Sample) error {
 	// Num Channels (1 for Mono)
 	binary.Write(f, binary.LittleEndian, uint16(1))
 	// Sample Rate (44100)
-	binary.Write(f, binary.LittleEndian, uint32(SampleRate))
-	// Byte Rate (SampleRate * NumChannels * BitsPerSample/8)
-	binary.Write(f, binary.LittleEndian, uint32(SampleRate*1*2))
+	binary.Write(f, binary.LittleEndian, uint32(InternalSampleRate))
+	// Byte Rate (InternalSampleRate * NumChannels * BitsPerSample/8)
+	binary.Write(f, binary.LittleEndian, uint32(InternalSampleRate*1*2))
 	// Block Align (NumChannels * BitsPerSample/8)
 	binary.Write(f, binary.LittleEndian, uint16(2))
 	// Bits Per Sample (16)
@@ -95,5 +95,5 @@ func LoadWavSample(path string) (*Sample, error) {
 		samples = append(samples, sample)
 	}
 
-	return &Sample{Rate: 44100, Data: samples}, nil
+	return &Sample{Rate: InternalSampleRate, Data: samples}, nil
 }

@@ -5,7 +5,7 @@ import (
 )
 
 const (
-	SampleRate = 44100
+	InternalSampleRate = 44100
 	BitDepth   = 16
 	MaxAmp     = 32767 // Max value for int16
 )

@@ -23,10 +23,10 @@ type Clue struct {
 }
 
 func (g *Generator) Generate() error {
-	samplesPerBeat := (SampleRate * 60) / g.BPM
+	samplesPerBeat := (InternalSampleRate * 60) / g.BPM
         bufferLen := (g.Bars + 2) * g.BeatsPerBar * samplesPerBeat
         buffer := make([]int16, bufferLen)
-	clickTrackSample := &Sample{Rate: 44100, Data: buffer}
+	clickTrackSample := &Sample{Rate: InternalSampleRate, Data: buffer}
 
 	err := g.GenerateClickTrack(clickTrackSample)
 	if err != nil {
@@ -39,7 +39,7 @@ func (g *Generator) Generate() error {
 	}
 
         buffer = make([]int16, bufferLen)
-	clueTrackSample := &Sample{Rate: 44100, Data: buffer}
+	clueTrackSample := &Sample{Rate: InternalSampleRate, Data: buffer}
         err = g.GenerateClueStream(samplesPerBeat, clueTrackSample, 1.0)
 	if err != nil {
 		return err
@@ -82,7 +82,7 @@ func (g *Generator) Generate() error {
 }
 
 func (g *Generator) GenerateClickTrack(target *Sample) error {
-	samplesPerBeat := (SampleRate * 60) / g.BPM
+	samplesPerBeat := (InternalSampleRate * 60) / g.BPM
 	
 	// 1. Prepare assets
 	var clickAsset *Sample
@@ -131,14 +131,14 @@ func (g *Generator) GenerateClickTrack(target *Sample) error {
 }
 
 func generateSinePulse(freq float64, duration float64) *Sample {
-	numSamples := int(float64(SampleRate) * duration)
+	numSamples := int(float64(InternalSampleRate) * duration)
 	pulse := make([]int16, numSamples)
 	for i := 0; i < numSamples; i++ {
-		t := float64(i) / SampleRate
+		t := float64(i) / InternalSampleRate
 		// Apply a simple linear decay (Envelope) to avoid digital clicking/popping
 		envelope := 1.0 - (float64(i) / float64(numSamples))
 		value := math.Sin(2 * math.Pi * freq * t)
 		pulse[i] = int16(value * MaxAmp * 0.5 * envelope)
 	}
-	return &Sample{Rate: 44100, Data: pulse}
+	return &Sample{Rate: InternalSampleRate, Data: pulse}
 }
