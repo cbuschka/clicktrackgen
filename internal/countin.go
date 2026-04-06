@@ -17,7 +17,7 @@ func (g *Generator) GenerateCountin(samplesPerBeat int, clickAsset *Sample, targ
 				continue
 			}
 			
-			offset := (m * 4 * samplesPerBeat) + (b * samplesPerBeat)
+			offset := (m * g.BeatsPerBar * samplesPerBeat) + (b * samplesPerBeat)
 			
 			err := target.MixIn(clickAsset, offset, gain)
 			if err != nil {

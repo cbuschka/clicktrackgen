@@ -7,6 +7,7 @@ import (
 type Generator struct {
 	BPM          int
 	Bars int
+	BeatsPerBar int
 	SongTrackFileName     string
 	ClickTrackFileName     string
 	ClueTrackFileName     string
@@ -23,7 +24,7 @@ type Clue struct {
 
 func (g *Generator) Generate() error {
 	samplesPerBeat := (SampleRate * 60) / g.BPM
-        bufferLen := (g.Bars + 2) * 4 * samplesPerBeat
+        bufferLen := (g.Bars + 2) * g.BeatsPerBar * samplesPerBeat
         buffer := make([]int16, bufferLen)
 	clickTrackSample := &Sample{Rate: 44100, Data: buffer}
 
@@ -60,7 +61,7 @@ func (g *Generator) Generate() error {
 
 			songTrackSample.TrimSilence(0.1)
 
-			err = combinedTrackSample.MixIn(songTrackSample, 2 * 4 * samplesPerBeat, 1.0)
+			err = combinedTrackSample.MixIn(songTrackSample, 2 * g.BeatsPerBar * samplesPerBeat, 1.0)
 			if err != nil {
 				return err
 			}
@@ -103,14 +104,14 @@ func (g *Generator) GenerateClickTrack(target *Sample) error {
 		return err
 	}
 
-	samplesForCountIn := samplesPerBeat * 4 * 2 
+	samplesForCountIn := samplesPerBeat * g.BeatsPerBar * 2 
 
 	// 3. Generate the Main Song "Module"
 	songBars := g.Bars
 	
 	for m := 0; m < songBars; m++ {
-		for b := 0; b < 4; b++ {
-			offset := samplesForCountIn + (m * 4 * samplesPerBeat) + (b * samplesPerBeat)
+		for b := 0; b < g.BeatsPerBar; b++ {
+			offset := samplesForCountIn + (m * g.BeatsPerBar * samplesPerBeat) + (b * samplesPerBeat)
 
 			clickGain := 0.75			
 			asset := clickAsset

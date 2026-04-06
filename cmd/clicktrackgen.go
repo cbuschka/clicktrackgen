@@ -28,6 +28,7 @@ func main() {
 
 	bpm := flag.Int("bpm", 120, "Beats per minute")
 	bars := flag.Int("bars", 4, "Number of bars")
+	beatsPerBar := flag.Int("beatsPerBar", 4, "Number of beats per bar")
 	songTrackIn := flag.String("songTrackIn", "song.wav", "Input file")
 	clickTrackOut := flag.String("clickTrackOut", "click.wav", "Output file")
 	clueTrackOut := flag.String("clueTrackOut", "clue.wav", "Output file")
@@ -69,6 +70,7 @@ func main() {
 	gen := &internal.Generator{
 		BPM:          *bpm,
 		Bars:     *bars,
+		BeatsPerBar: *beatsPerBar,
 		SongTrackFileName: *songTrackIn,
 		ClickTrackFileName:     *clickTrackOut,
 		ClueTrackFileName:     *clueTrackOut,
