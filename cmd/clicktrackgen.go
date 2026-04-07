@@ -33,6 +33,7 @@ func main() {
 	clickTrackOut := flag.String("clickTrackOut", "click.wav", "Output file")
 	clueTrackOut := flag.String("clueTrackOut", "clue.wav", "Output file")
 	combinedTrackOut := flag.String("combinedTrackOut", "combined.wav", "Output file")
+	allTrackOut := flag.String("allTrackOut", "all.wav", "Output file")
 	samplePath := flag.String("sample", "", "Path to custom click WAV (optional)")
 	accentSamplePath := flag.String("accentSample", "", "Path to custom click WAV (optional)")
 	cluesFlag := flag.String("clues", "", "Clues")
@@ -76,6 +77,7 @@ func main() {
 		ClickTrackFileName:     *clickTrackOut,
 		ClueTrackFileName:     *clueTrackOut,
 		CombinedTrackFileName:     *combinedTrackOut,
+		AllTrackFileName:     *allTrackOut,
 		CustomSample: customData, // Pass the slice (nil if not loaded)
 		AccentCustomSample: accentCustomData, // Pass the slice (nil if not loaded)
 		Clues:        clues,

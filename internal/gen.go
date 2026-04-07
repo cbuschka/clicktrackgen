@@ -13,6 +13,7 @@ type Generator struct {
 	ClickTrackFileName     string
 	ClueTrackFileName     string
 	CombinedTrackFileName     string
+	AllTrackFileName     string
 	CustomSample *Sample // Optional: User-provided WAV data
 	AccentCustomSample *Sample // Optional: User-provided WAV data
 	Clues []Clue
@@ -34,9 +35,11 @@ func (g *Generator) Generate() error {
 		return err
 	}
 
-	err = WriteSample(g.ClickTrackFileName, clickTrackSample)
-	if err != nil {
-		return err
+	if g.ClickTrackFileName != "" {
+		err = WriteSample(g.ClickTrackFileName, clickTrackSample)
+		if err != nil {
+			return err
+		}
 	}
 
         buffer = make([]int16, bufferLen)
@@ -46,34 +49,42 @@ func (g *Generator) Generate() error {
 		return err
 	}
 
-	err = WriteSample(g.ClueTrackFileName, clueTrackSample)
+	if g.ClueTrackFileName != "" {
+		err = WriteSample(g.ClueTrackFileName, clueTrackSample)
+		if err != nil {
+			return err
+		}
+	}
+
+	combinedTrackSample := clickTrackSample.Clone()
+	err = combinedTrackSample.MixIn(clueTrackSample, 0, 1.0)
 	if err != nil {
 		return err
 	}
 
-
 	if g.CombinedTrackFileName != "" {
-		combinedTrackSample := clickTrackSample.Clone()
-		if g.SongTrackFileName != "" {
-			songTrackSample, err := ReadSample(g.SongTrackFileName)
-			if err != nil {
-				return err
-			}
-
-			songTrackSample.TrimSilence(0.1)
-
-			err = combinedTrackSample.MixIn(songTrackSample, g.CountInBars * g.BeatsPerBar * samplesPerBeat, 1.0)
-			if err != nil {
-				return err
-			}
+		err = WriteSample(g.CombinedTrackFileName, combinedTrackSample)
+		if err != nil {
+			return err
 		}
+	}
 
-		err = combinedTrackSample.MixIn(clueTrackSample, 0, 1.0)
+	if g.SongTrackFileName != "" {
+		songTrackSample, err := ReadSample(g.SongTrackFileName)
 		if err != nil {
 			return err
 		}
 
-		err = WriteSample(g.CombinedTrackFileName, combinedTrackSample)
+		songTrackSample.TrimSilence(0.1)
+
+		err = combinedTrackSample.MixIn(songTrackSample, g.CountInBars * g.BeatsPerBar * samplesPerBeat, 1.0)
+		if err != nil {
+			return err
+		}
+	}
+
+	if g.AllTrackFileName != "" {
+		err = WriteSample(g.AllTrackFileName, combinedTrackSample)
 		if err != nil {
 			return err
 		}
