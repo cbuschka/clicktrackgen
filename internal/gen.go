@@ -111,7 +111,7 @@ func (g *Generator) GenerateClickTrack(target *Sample) error {
 	}
 
 	// 2. Generate the Count-in "Module"
-	err := g.GenerateCountin(samplesPerBeat, clickAsset, target, 1.0)
+	err := g.GenerateCountin(samplesPerBeat, accentClickAsset, target, 1.0)
 	if err != nil {
 		return err
 	}
