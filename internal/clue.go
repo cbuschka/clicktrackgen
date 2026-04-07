@@ -38,7 +38,7 @@ func newSpeechSample(speech htgotts.Speech, text string) (*Sample, error) {
 		log.Printf("speech file for text='%s' already exists", text)
 	}
 
-	voiceSample, err := LoadMp3Sample(filename)
+	voiceSample, err := ReadSample(filename)
 	if err != nil {
 		return nil, err
 	}

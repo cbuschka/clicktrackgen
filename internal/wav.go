@@ -8,8 +8,7 @@ import (
 	"os"
 )
 
-// WriteWav wraps the raw PCM data with the necessary 44-byte header
-func (g *Generator) writeToWav(fileName string, sample *Sample) error {
+func writeWavSample(fileName string, sample *Sample) error {
 	file, err := os.Create(fileName)
 	if err != nil {
 		return err
@@ -60,8 +59,7 @@ func (g *Generator) writeToWav(fileName string, sample *Sample) error {
 	return nil
 }
 
-// LoadWavSamples reads a 16-bit Mono WAV and returns the raw PCM data
-func LoadWavSample(path string) (*Sample, error) {
+func loadWavSample(path string) (*Sample, error) {
 	f, err := os.Open(path)
 	if err != nil {
 		return nil, err

@@ -1,14 +1,15 @@
 package internal
 
 import (
+	"bufio"
 	"io"
 	"os"
 
 	"github.com/hajimehoshi/go-mp3"
+	shineMp3 "github.com/braheezy/shine-mp3/pkg/mp3"
 )
 
-// LoadMp3Samples decodes an MP3 file into a slice of int16 samples.
-func LoadMp3Sample(path string) (*Sample, error) {
+func loadMp3Sample(path string) (*Sample, error) {
 	f, err := os.Open(path)
 	if err != nil {
 		return nil, err
@@ -57,3 +58,27 @@ func LoadMp3Sample(path string) (*Sample, error) {
 	return &Sample{Rate: InternalSampleRate, Data: samples}, nil
 }
 
+func writeMp3Sample(path string, sample *Sample) error {
+	f, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE, 0644)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	out := bufio.NewWriter(f)
+	defer out.Flush()
+
+	mp3Encoder := shineMp3.NewEncoder(sample.Rate, 2)
+
+	data := make([]int16, 0, len(sample.Data)*2)
+	for index := range sample.Data {
+		data = append(data, sample.Data[index], sample.Data[index])
+	}
+
+	err = mp3Encoder.Write(out, data)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

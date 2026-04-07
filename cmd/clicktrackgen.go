@@ -52,7 +52,7 @@ func main() {
 
 	// If the user provided a sample, load it into memory
 	if *samplePath != "" {
-		customData, err = internal.LoadWavSample(*samplePath)
+		customData, err = internal.ReadSample(*samplePath)
 		if err != nil {
 			log.Fatalf("Could not load custom sample: %v", err)
 		}
@@ -60,7 +60,7 @@ func main() {
 	}
 
 	if *accentSamplePath != "" {
-		accentCustomData, err = internal.LoadWavSample(*accentSamplePath)
+		accentCustomData, err = internal.ReadSample(*accentSamplePath)
 		if err != nil {
 			log.Fatalf("Could not load custom sample: %v", err)
 		}

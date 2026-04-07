@@ -34,7 +34,7 @@ func (g *Generator) Generate() error {
 		return err
 	}
 
-	err = g.writeToWav(g.ClickTrackFileName, clickTrackSample)
+	err = WriteSample(g.ClickTrackFileName, clickTrackSample)
 	if err != nil {
 		return err
 	}
@@ -46,7 +46,7 @@ func (g *Generator) Generate() error {
 		return err
 	}
 
-	err = g.writeToWav(g.ClueTrackFileName, clueTrackSample)
+	err = WriteSample(g.ClueTrackFileName, clueTrackSample)
 	if err != nil {
 		return err
 	}
@@ -55,7 +55,7 @@ func (g *Generator) Generate() error {
 	if g.CombinedTrackFileName != "" {
 		combinedTrackSample := clickTrackSample.Clone()
 		if g.SongTrackFileName != "" {
-			songTrackSample, err := LoadWavSample(g.SongTrackFileName)
+			songTrackSample, err := ReadSample(g.SongTrackFileName)
 			if err != nil {
 				return err
 			}
@@ -73,7 +73,7 @@ func (g *Generator) Generate() error {
 			return err
 		}
 
-		err = g.writeToWav(g.CombinedTrackFileName, combinedTrackSample)
+		err = WriteSample(g.CombinedTrackFileName, combinedTrackSample)
 		if err != nil {
 			return err
 		}
